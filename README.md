@@ -1,4 +1,4 @@
-<h1>Hi, I'm Zack! <br/><a href="https://github.com/joshmadakor1">Aspiring Cybersecurity Analyst</a> <a href="https://www.linkedin.com/in/zackariah-telsem-a8b245246"/a></h1>
+<h1>Hi, I'm Zack! <br/><a href="https://github.com/ztels/ztels/tree/main">Aspiring Cybersecurity Analyst</a> <a href="https://www.linkedin.com/in/zackariah-telsem-a8b245246"/a></h1>
 
 <h2>👨‍💻 Cybersecurity Projects</h2>
 
