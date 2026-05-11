@@ -1,0 +1,477 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+
+  .flow-wrap { padding: 1rem 0 2rem; }
+
+  .legend {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    margin-bottom: 1.5rem; padding: 0.75rem 1rem;
+    background: var(--color-background-secondary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-md);
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-text-secondary); }
+  .leg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .leg-happy { background: #1D9E75; }
+  .leg-alt { background: #534AB7; }
+  .leg-err { background: #D85A30; }
+  .leg-repeat { background: #185FA5; }
+
+  .screens-row {
+    display: flex; gap: 0; align-items: flex-start;
+    overflow-x: auto; padding-bottom: 0.5rem;
+    position: relative;
+  }
+
+  .screen-col {
+    display: flex; flex-direction: column; align-items: center;
+    min-width: 128px; flex: 1;
+  }
+
+  .connector-wrap {
+    display: flex; align-items: center; padding-top: 72px;
+    flex-shrink: 0; width: 28px; position: relative;
+  }
+  .connector-line {
+    height: 1.5px; width: 100%; background: var(--color-border-secondary);
+    position: relative;
+  }
+  .connector-line::after {
+    content: '';
+    position: absolute; right: -5px; top: 50%;
+    transform: translateY(-50%);
+    border-left: 6px solid var(--color-border-secondary);
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+  }
+
+  .phone-frame {
+    width: 120px; height: 210px;
+    border: 2px solid var(--color-border-primary);
+    border-radius: 18px;
+    background: var(--color-background-primary);
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .phone-frame::before {
+    content: '';
+    display: block; width: 36px; height: 4px;
+    background: var(--color-border-secondary);
+    border-radius: 2px; margin: 8px auto 0;
+  }
+
+  .screen-inner { padding: 6px 8px; height: 100%; display: flex; flex-direction: column; }
+
+  .screen-label {
+    font-size: 9px; font-weight: 500; letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+    text-align: center; margin: 0.6rem 0 0.25rem;
+  }
+  .screen-num {
+    width: 20px; height: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 500;
+    background: var(--color-background-secondary);
+    color: var(--color-text-secondary);
+    border: 0.5px solid var(--color-border-tertiary);
+    margin-bottom: 0.4rem;
+  }
+
+  .states-card {
+    width: 120px; margin-top: 10px;
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-md);
+    background: var(--color-background-primary);
+    overflow: hidden;
+  }
+  .state-row {
+    display: flex; align-items: flex-start; gap: 6px;
+    padding: 5px 7px;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    font-size: 9.5px; line-height: 1.35;
+  }
+  .state-row:last-child { border-bottom: none; }
+  .state-badge {
+    font-size: 8px; font-weight: 500; padding: 1px 4px;
+    border-radius: 3px; white-space: nowrap; flex-shrink: 0; margin-top: 1px;
+  }
+  .s-empty { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+  .s-load  { background: #E6F1FB; color: #185FA5; }
+  .s-ok    { background: #E1F5EE; color: #0F6E56; }
+  .s-err   { background: #FAECE7; color: #993C1D; }
+  .s-rpt   { background: #EEEDFE; color: #534AB7; }
+
+  .action-tag {
+    font-size: 9px; color: var(--color-text-secondary);
+    text-align: center; margin-top: 8px; font-style: italic;
+  }
+  .action-tag span {
+    display: inline-block;
+    background: var(--color-background-secondary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: 3px; padding: 2px 5px;
+    font-style: normal;
+  }
+
+  /* Inline screen designs */
+  .s-header {
+    font-size: 8px; font-weight: 500; text-align: center;
+    color: var(--color-text-primary); margin-top: 4px;
+  }
+  .s-sub {
+    font-size: 7.5px; color: var(--color-text-secondary);
+    text-align: center; margin: 2px 0 6px;
+    line-height: 1.3;
+  }
+  .s-btn {
+    display: block; width: 100%; padding: 5px 0;
+    font-size: 8px; text-align: center; border-radius: 6px;
+    font-weight: 500; margin-top: auto;
+    cursor: default;
+  }
+  .btn-primary { background: #1D9E75; color: #04342C; }
+  .btn-secondary { background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-tertiary); }
+  .btn-coral { background: #D85A30; color: #4A1B0C; }
+  .btn-blue { background: #378ADD; color: #042C53; }
+
+  .avatar-row { display: flex; justify-content: center; gap: 5px; margin: 6px 0; }
+  .avatar {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; font-weight: 500;
+  }
+  .av-teal { background: #9FE1CB; color: #085041; }
+  .av-amber { background: #FAC775; color: #633806; }
+  .av-gray { background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-tertiary); }
+
+  .feed-post {
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: 5px; overflow: hidden; margin: 3px 0;
+  }
+  .feed-img { height: 38px; background: var(--color-background-secondary); display: flex; align-items: center; justify-content: center; }
+  .feed-cap { font-size: 7px; padding: 2px 4px; color: var(--color-text-secondary); }
+
+  .setting-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 0; border-bottom: 0.5px solid var(--color-border-tertiary);
+  }
+  .setting-label { font-size: 8px; color: var(--color-text-primary); }
+  .toggle-mini {
+    width: 22px; height: 13px; border-radius: 7px; background: var(--color-border-secondary);
+    position: relative;
+  }
+  .toggle-mini.on { background: #1D9E75; }
+  .toggle-mini::after {
+    content: ''; position: absolute;
+    width: 9px; height: 9px; top: 2px; left: 2px;
+    background: white; border-radius: 50%;
+    transition: transform 0.2s;
+  }
+  .toggle-mini.on::after { transform: translateX(9px); }
+
+  .varflow {
+    display: flex; gap: 10px; margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .varcard {
+    flex: 1; min-width: 220px;
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    background: var(--color-background-primary);
+    padding: 0.875rem 1rem;
+  }
+  .varcard-title {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.03em;
+    color: var(--color-text-secondary); margin-bottom: 0.6rem;
+    text-transform: uppercase;
+  }
+  .var-row {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 5px 0; border-bottom: 0.5px solid var(--color-border-tertiary);
+    font-size: 12px; color: var(--color-text-primary); line-height: 1.4;
+  }
+  .var-row:last-child { border-bottom: none; }
+  .var-screen-tag {
+    font-size: 9px; font-weight: 500; padding: 2px 5px;
+    border-radius: 3px; white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+  }
+  .vt-green { background: #E1F5EE; color: #0F6E56; }
+  .vt-blue  { background: #E6F1FB; color: #185FA5; }
+  .vt-amber { background: #FAEEDA; color: #854F0B; }
+  .vt-coral { background: #FAECE7; color: #993C1D; }
+  .vt-purple { background: #EEEDFE; color: #534AB7; }
+
+  .section-head {
+    font-size: 10px; font-weight: 500; letter-spacing: 0.06em;
+    color: var(--color-text-secondary); margin: 1.25rem 0 0.6rem;
+    text-transform: uppercase;
+  }
+
+  .transition-note {
+    font-size: 10px; color: var(--color-text-secondary);
+    text-align: center; margin-top: 4px;
+  }
+</style>
+
+<h2 class="sr-only">Daily Duo feature flow map showing five screens: intro, pairing, daily prompt, post confirmation, and settings, with states and microcopy for each.</h2>
+
+<div class="flow-wrap">
+
+  <div class="legend">
+    <div class="legend-item"><div class="leg-dot leg-happy"></div>Happy path</div>
+    <div class="legend-item"><div class="leg-dot leg-alt"></div>First-time vs. repeat</div>
+    <div class="legend-item"><div class="leg-dot leg-err"></div>Error state</div>
+    <div class="legend-item"><div class="leg-dot leg-repeat"></div>Microcopy</div>
+  </div>
+
+  <!-- ── SCREENS ROW ── -->
+  <div class="screens-row">
+
+    <!-- Screen 1: Intro -->
+    <div class="screen-col">
+      <div class="screen-num">1</div>
+      <div class="phone-frame">
+        <div class="screen-inner">
+          <div class="s-header">Daily Duo</div>
+          <div class="s-sub">Post together. See the same moment from two lenses.</div>
+          <div class="avatar-row">
+            <div class="avatar av-teal">J</div>
+            <div style="font-size:10px;color:var(--color-text-secondary);align-self:center">+</div>
+            <div class="avatar av-gray">?</div>
+          </div>
+          <div style="font-size:7.5px;text-align:center;color:var(--color-text-secondary);margin-bottom:6px;">Pair with one friend daily</div>
+          <div class="s-btn btn-primary">Invite a friend</div>
+          <div class="s-btn btn-secondary" style="margin-top:4px;">Maybe later</div>
+        </div>
+      </div>
+      <div class="screen-label">Intro / opt-in</div>
+      <div class="action-tag">Tap "Invite a friend" <span>→</span></div>
+      <div class="states-card">
+        <div class="state-row">
+          <div class="state-badge s-empty">empty</div>
+          <div>"Pair up and post together."</div>
+        </div>
+        <div class="state-row">
+          <div class="state-badge s-rpt">repeat</div>
+          <div>"You're back! Pick today's Duo."</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector-wrap"><div class="connector-line"></div></div>
+
+    <!-- Screen 2: Pairing -->
+    <div class="screen-col">
+      <div class="screen-num">2</div>
+      <div class="phone-frame">
+        <div class="screen-inner">
+          <div class="s-header" style="margin-bottom:4px;">Choose your Duo</div>
+          <div style="font-size:7.5px;color:var(--color-text-secondary);margin-bottom:5px;">Pick one friend for today</div>
+          <div style="display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:0.5px solid var(--color-border-tertiary)">
+            <div class="avatar av-teal" style="width:18px;height:18px;font-size:7px;">M</div>
+            <div style="font-size:8px;color:var(--color-text-primary);flex:1">Maya</div>
+            <div style="width:10px;height:10px;border-radius:50%;border:0.5px solid #1D9E75;"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:0.5px solid var(--color-border-tertiary)">
+            <div class="avatar av-amber" style="width:18px;height:18px;font-size:7px;">K</div>
+            <div style="font-size:8px;color:var(--color-text-primary);flex:1">Kai</div>
+            <div style="width:10px;height:10px;border-radius:50%;border:0.5px solid var(--color-border-tertiary);"></div>
+          </div>
+          <div style="font-size:7.5px;color:var(--color-text-secondary);margin:4px 0;text-align:center;">Finding your Duo…</div>
+          <div class="s-btn btn-primary" style="margin-top:auto;">Confirm pairing</div>
+        </div>
+      </div>
+      <div class="screen-label">Pairing screen</div>
+      <div class="action-tag">Select + confirm <span>→</span></div>
+      <div class="states-card">
+        <div class="state-row">
+          <div class="state-badge s-load">load</div>
+          <div>"Finding your Duo…"</div>
+        </div>
+        <div class="state-row">
+          <div class="state-badge s-ok">success</div>
+          <div>"You're paired with Maya!"</div>
+        </div>
+        <div class="state-row">
+          <div class="state-badge s-err">error</div>
+          <div>"Couldn't connect. Try again."</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector-wrap"><div class="connector-line"></div></div>
+
+    <!-- Screen 3: Daily Prompt -->
+    <div class="screen-col">
+      <div class="screen-num">3</div>
+      <div class="phone-frame">
+        <div class="screen-inner">
+          <div style="display:flex;justify-content:center;margin:4px 0 2px;">
+            <div style="display:flex;align-items:center;gap:3px;background:var(--color-background-secondary);border-radius:12px;padding:2px 7px;">
+              <div class="avatar av-teal" style="width:14px;height:14px;font-size:6px;">J</div>
+              <div style="font-size:7px;color:var(--color-text-secondary);">+</div>
+              <div class="avatar av-amber" style="width:14px;height:14px;font-size:6px;">M</div>
+            </div>
+          </div>
+          <div class="s-header">Time to BeReal</div>
+          <div class="s-sub">with Maya!</div>
+          <div style="height:60px;background:var(--color-background-secondary);border-radius:8px;margin:4px 0;display:flex;align-items:center;justify-content:center;">
+            <div style="font-size:18px;opacity:0.4;">📸</div>
+          </div>
+          <div style="font-size:7.5px;text-align:center;color:var(--color-text-secondary);margin-bottom:4px;">You have 2 min to post</div>
+          <div class="s-btn btn-primary">Open Camera</div>
+        </div>
+      </div>
+      <div class="screen-label">Daily prompt</div>
+      <div class="action-tag">Tap "Open camera" <span>→</span></div>
+      <div class="states-card">
+        <div class="state-row">
+          <div class="state-badge s-empty">waiting</div>
+          <div>"Waiting for Maya to post too."</div>
+        </div>
+        <div class="state-row">
+          <div class="state-badge s-rpt">repeat</div>
+          <div>"Day 3 with Maya 🔥"</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector-wrap"><div class="connector-line"></div></div>
+
+    <!-- Screen 4: Post Confirmation -->
+    <div class="screen-col">
+      <div class="screen-num">4</div>
+      <div class="phone-frame">
+        <div class="screen-inner">
+          <div style="display:flex;justify-content:center;margin:4px 0;">
+            <div style="width:16px;height:16px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:9px;">✓</div>
+          </div>
+          <div class="s-header">You both posted!</div>
+          <div class="s-sub">🔆 See your shared moment</div>
+          <div style="display:flex;gap:4px;margin:4px 0;">
+            <div class="feed-post" style="flex:1;">
+              <div class="feed-img" style="font-size:7px;color:var(--color-text-secondary);">You</div>
+              <div class="feed-cap">front + back</div>
+            </div>
+            <div class="feed-post" style="flex:1;">
+              <div class="feed-img" style="font-size:7px;color:var(--color-text-secondary);">Maya</div>
+              <div class="feed-cap">front + back</div>
+            </div>
+          </div>
+          <div class="s-btn btn-primary" style="margin-top:auto;">View in Feed</div>
+          <div class="s-btn btn-secondary" style="margin-top:4px;">Share moment</div>
+        </div>
+      </div>
+      <div class="screen-label">Post confirmation</div>
+      <div class="action-tag">View feed or share <span>→</span></div>
+      <div class="states-card">
+        <div class="state-row">
+          <div class="state-badge s-ok">success</div>
+          <div>"You both posted! 🔆"</div>
+        </div>
+        <div class="state-row">
+          <div class="state-badge s-err">error</div>
+          <div>"Post failed. Tap to retry."</div>
+        </div>
+        <div class="state-row">
+          <div class="state-badge s-empty">pending</div>
+          <div>"Waiting on Maya's post…"</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector-wrap"><div class="connector-line"></div></div>
+
+    <!-- Screen 5: Settings / Opt-out -->
+    <div class="screen-col">
+      <div class="screen-num">5</div>
+      <div class="phone-frame">
+        <div class="screen-inner">
+          <div class="s-header" style="margin-bottom:6px;">Daily Duo settings</div>
+          <div class="setting-row">
+            <div class="setting-label">Daily Duo</div>
+            <div class="toggle-mini on"></div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">Notifications</div>
+            <div class="toggle-mini on"></div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label">Auto-suggest</div>
+            <div class="toggle-mini"></div>
+          </div>
+          <div style="margin-top:8px;padding:5px;background:var(--color-background-secondary);border-radius:6px;">
+            <div style="font-size:7.5px;color:var(--color-text-secondary);text-align:center;">Paired with Maya</div>
+            <div style="font-size:7px;color:#993C1D;text-align:center;margin-top:2px;cursor:default;">Remove pairing</div>
+          </div>
+          <div class="s-btn btn-secondary" style="margin-top:auto;font-size:7.5px;">Leave Daily Duo</div>
+        </div>
+      </div>
+      <div class="screen-label">Settings / opt-out</div>
+      <div class="action-tag">Toggle or leave</div>
+      <div class="states-card">
+        <div class="state-row">
+          <div class="state-badge s-err">opt-out</div>
+          <div>"You can always rejoin."</div>
+        </div>
+        <div class="state-row">
+          <div class="state-badge s-rpt">paired</div>
+          <div>"Paired with Maya · Day 3"</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /screens-row -->
+
+  <!-- ── VARIATION FLOWS ── -->
+  <div class="section-head">Variation flows</div>
+  <div class="varflow">
+
+    <!-- First-time vs repeat -->
+    <div class="varcard">
+      <div class="varcard-title">First-time vs. repeat user</div>
+      <div class="var-row">
+        <div class="var-screen-tag vt-green">Intro</div>
+        <div>First-time: full onboarding card. Repeat: "Welcome back — pick today's Duo."</div>
+      </div>
+      <div class="var-row">
+        <div class="var-screen-tag vt-blue">Pairing</div>
+        <div>First-time: friend list from scratch. Repeat: last Duo surfaced first with "Pair again with Maya?"</div>
+      </div>
+      <div class="var-row">
+        <div class="var-screen-tag vt-amber">Prompt</div>
+        <div>First-time: timer shown. Repeat: streak counter shown ("Day 3 🔥").</div>
+      </div>
+      <div class="var-row">
+        <div class="var-screen-tag vt-purple">Settings</div>
+        <div>First-time: feature tips visible. Repeat: clean toggle view only.</div>
+      </div>
+    </div>
+
+    <!-- Success vs error -->
+    <div class="varcard">
+      <div class="varcard-title">Success vs. error states</div>
+      <div class="var-row">
+        <div class="var-screen-tag vt-blue">Pairing</div>
+        <div>Success: "You're paired with Maya!" → auto-advance. Error: "Couldn't connect. Try again later." + retry CTA.</div>
+      </div>
+      <div class="var-row">
+        <div class="var-screen-tag vt-green">Post</div>
+        <div>Success: "You both posted! 🔆" Error: "Post failed. Your photo is saved — tap to retry."</div>
+      </div>
+      <div class="var-row">
+        <div class="var-screen-tag vt-amber">Pending</div>
+        <div>One-sided post: "Posted! Waiting on Maya…" with live indicator.</div>
+      </div>
+      <div class="var-row">
+        <div class="var-screen-tag vt-coral">Opt-out</div>
+        <div>"Pairing removed. You can always rejoin later." → returns to standard feed.</div>
+      </div>
+    </div>
+
+  </div><!-- /varflow -->
+
+</div>
